@@ -11,8 +11,8 @@
 1. Install AutoHotKey  
 https://www.autohotkey.com/download/ahk-install.exe  
 During installation, choose Unicode 64  
-2. Set the variables here below according to your preferences  
-Documentation for each is included below, read carefully  
+2. Set the variables here in the script according to your preferences  
+Documentation for each is included in the scrit, read carefully  
 3. Start the script  
 4. Go in game and change your resolution to "Windowed"  
 It can be "Windowed Fullscreen" but only if you don't experience the Vulkan bug where "Windowed Fullscreen" is actually working as normal exclusive "Fullscreen"  
