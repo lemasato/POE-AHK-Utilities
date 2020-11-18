@@ -1,4 +1,4 @@
-﻿/*
+/*
 	v1.0
     POE Borderless Enhanced by lemasato
     Standalone script part of POE AHK Utilities
@@ -102,6 +102,9 @@ CUSTOM_GAME_POSITION_ENABLE := False ; True     Allows to use specific x,y,width
 CUSTOM_GAME_X_POSITION := 0, CUSTOM_GAME_Y_POSITION := 0, CUSTOM_GAME_WIDTH := 1000, CUSTOM_GAME_HEIGHT := 700 ; Only use if CUSTOM_GAME_POSITION_ENABLE is set to True
 
 
+USE_OUTPUT_LOGGING := True ; True       Will write logs in a file, used for debugging
+                           ; False      No output log file will be created
+
 
 
 /*  SCRIPT CONTENT STARTING HERE
@@ -144,12 +147,31 @@ Loop, Parse, POEGameExeList, % ","
     GroupAdd, POEGameGroup, ahk_exe %A_LoopField%
 }
 global DoneOnceGameHandles := {}
-
+global LOGS_FILE := A_ScriptDir "\POE Borderless Enhanced LOGS.txt"
 
 Register_ShellHook()
 OnShellMessage(4, WinActive("A"))
 funcObj := Func("DeleteInactiveGameHandles").Bind()
 SetTimer,% funcObj,% 60*60000 ; 1 hour
+FileDelete,% LOGS_FILE
+
+if (USE_OUTPUT_LOGGING=True) {
+    FileAppend,% ""
+    . "`nKEEP_TASKBAR_VISIBLE: " (KEEP_TASKBAR_VISIBLE=True?"True":KEEP_TASKBAR_VISIBLE=False?"False":KEEP_TASKBAR_VISIBLE)
+    . "`nEXIT_APP_AFTER_BORDERLESS: " (EXIT_APP_AFTER_BORDERLESS=True?"True":EXIT_APP_AFTER_BORDERLESS=False?"False":EXIT_APP_AFTER_BORDERLESS)
+    . "`nUSE_ONE_PIXEL_OFFSET_FIX: " (USE_ONE_PIXEL_OFFSET_FIX=True?"True":USE_ONE_PIXEL_OFFSET_FIX=False?"False":USE_ONE_PIXEL_OFFSET_FIX)
+    . "`nSIMULATE_WIDE_SCREEN: " (SIMULATE_WIDE_SCREEN=True?"True":SIMULATE_WIDE_SCREEN=False?"False":SIMULATE_WIDE_SCREEN)
+    . "`nUSE_BLACK_BARS_WITH_WIDE_SCREEN: " (USE_BLACK_BARS_WITH_WIDE_SCREEN=True?"True":USE_BLACK_BARS_WITH_WIDE_SCREEN=False?"False":USE_BLACK_BARS_WITH_WIDE_SCREEN)
+    . "`nBLACK_BARS_TRANSPARENCY_PERCENT: " (BLACK_BARS_TRANSPARENCY_PERCENT=True?"True":BLACK_BARS_TRANSPARENCY_PERCENT=False?"False":BLACK_BARS_TRANSPARENCY_PERCENT)
+    . "`nBLACK_BARS_ARE_CLICK_THROUGH: " (BLACK_BARS_ARE_CLICK_THROUGH=True?"True":BLACK_BARS_ARE_CLICK_THROUGH=False?"False":BLACK_BARS_ARE_CLICK_THROUGH)
+    . "`nCUSTOM_GAME_POSITION_ENABLE: " (CUSTOM_GAME_POSITION_ENABLE=True?"True":CUSTOM_GAME_POSITION_ENABLE=False?"False":CUSTOM_GAME_POSITION_ENABLE)
+    . "`nCUSTOM_GAME_X_POSITION: " CUSTOM_GAME_X_POSITION
+    . "`nCUSTOM_GAME_Y_POSITION: " CUSTOM_GAME_Y_POSITION
+    . "`nCUSTOM_GAME_WIDTH: " CUSTOM_GAME_WIDTH
+    . "`nCUSTOM_GAME_HEIGHT: " CUSTOM_GAME_HEIGHT
+    . "`nUSE_OUTPUT_LOGGING: " (USE_OUTPUT_LOGGING=True?"True":USE_OUTPUT_LOGGING=False?"False":USE_OUTPUT_LOGGING)
+    ,% LOGS_FILE
+}
 return
 
 MakeBorderless(winHwnd) {
@@ -157,6 +179,7 @@ MakeBorderless(winHwnd) {
     global KEEP_TASKBAR_VISIBLE, EXIT_APP_AFTER_BORDERLESS, USE_ONE_PIXEL_OFFSET_FIX
     global SIMULATE_WIDE_SCREEN, USE_BLACK_BARS_WITH_WIDE_SCREEN, BLACK_BARS_TRANSPARENCY_PERCENT, BLACK_BARS_ARE_CLICK_THROUGH
     global CUSTOM_GAME_POSITION_ENABLE, CUSTOM_GAME_X_POSITION, CUSTOM_GAME_Y_POSITION, CUSTOM_GAME_WIDTH, CUSTOM_GAME_HEIGHT
+    global USE_OUTPUT_LOGGING, LOGS_FILE
 
     global DoneOnceGameHandles
     global hGuiBlackBarMain
@@ -182,21 +205,47 @@ MakeBorderless(winHwnd) {
         ,% newWinW := CUSTOM_GAME_POSITION_ENABLE=True ? CUSTOM_GAME_WIDTH : KEEP_TASKBAR_VISIBLE ? monitorPosition.RightWA - monitorPosition.LeftWA : monitorPosition.Right - monitorPosition.Left
         ,% newWinH := CUSTOM_GAME_POSITION_ENABLE=True ? CUSTOM_GAME_HEIGHT : SIMULATE_WIDE_SCREEN=True ? 1 : ( KEEP_TASKBAR_VISIBLE=True ? monitorPosition.BottomWA - monitorPosition.TopWA : monitorPosition.Bottom - monitorPosition.Top )
 
-        if (EXIT_APP_AFTER_BORDERLESS=True && USE_BLACK_BARS_WITH_WIDE_SCREEN != True)
+        if (USE_OUTPUT_LOGGING=True) {
+            WinGet, newStyles, Style,% "ahk_id " winHwnd
+            FileAppend,% "`n`nCurrent window style of " winHwnd ": " activeStyles ". New: " newStyles
+            . "`nBorders detected: " hasBorders
+            . "`nGame window is on screen " monitorIndex
+            . "`nTask bar detected on " taskBarLocation " with x" taskBarSize.X " y" taskBarSize.Y " w" taskBarSize.W " h" taskBarSize.H
+            . "`nMonitor position detected on Left:" monitorPosition.Left " (WA " monitorPosition.LeftWA "), Top:" monitorPosition.Top " (WA " monitorPosition.TopWA
+            .    "), Right:" monitorPosition.Right " (WA " monitorPosition.RightWA "), Bottom:" monitorPosition.Bottom " (WA " monitorPosition.BottomWA ")"
+            . "`nGame window will be moved to x" newWinX " y" newWinY " w" newWinW " h" newWinH
+            ,% LOGS_FILE
+        }
+
+        if (EXIT_APP_AFTER_BORDERLESS=True && USE_BLACK_BARS_WITH_WIDE_SCREEN != True) {
+            if (USE_OUTPUT_LOGGING=True)
+                FileAppend,% "`n`nEXIT_APP_AFTER_BORDERLESS enabled. Exiting",% LOGS_FILE
             ExitApp
+        }
         if (SIMULATE_WIDE_SCREEN=True && CUSTOM_GAME_POSITION_ENABLE=False) {
             availableMonitorHeightSpace := KEEP_TASKBAR_VISIBLE ? monitorPosition.BottomWA - monitorPosition.TopWA + (taskBarLocation="Top"?taskBarSize.H:0) : monitorPosition.Bottom - monitorPosition.Top
             WinGetPos, winX, winY, winW, winH, % "ahk_id " winHwnd
             WinMove,% "ahk_id " winHwnd,,,% (availableMonitorHeightSpace/2) - (winH/2) ; + (KEEP_TASKBAR_VISIBLE && IsIn(taskBarLocation,"Top") ? taskBarSize.H : 0)
+            if (USE_OUTPUT_LOGGING=True)
+                FileAppend,% "`n`nSIMULATE_WIDE_SCREEN is enabled"
+                . "`nAvailable monitor height space: " availableMonitorHeightSpace
+                . "`nGame window has been moved to y" (availableMonitorHeightSpace/2) - (winH/2)
+                ,% LOGS_FILE
         }
         if (SIMULATE_WIDE_SCREEN=True && USE_BLACK_BARS_WITH_WIDE_SCREEN=True) {
             Loop {
+                index := A_Index
+                if (index=1 && USE_OUTPUT_LOGGING=True)
+                    FileAppend,% "`n`nWaiting for game window height to automatically be updated by the game",% LOGS_FILE
                 WinGetPos, newWinX, newWinY, newWinW, newWinH, % "ahk_id " winHwnd
                 if (newWinX != winX || newWinY != winY || newWinW != winW || newWinH != winH)
                     Break
                 Sleep 100
             }
             WinGetPos, winX, winY, winW, winH, % "ahk_id " winHwnd
+
+            if (index=1 && USE_OUTPUT_LOGGING=True)
+                FileAppend,% "`n`nGame updated window height automatically: x" winX " y" winY " w" winW " h" winH,% LOGS_FILE
 
             blackBarsGuis := {}
             blackBarsGuis["Main"] := [monitorPosition.Left
@@ -211,6 +260,13 @@ MakeBorderless(winHwnd) {
                                         ,winY+winH
                                         ,KEEP_TASKBAR_VISIBLE ? monitorPosition.RightWA - monitorPosition.LeftWA : monitorPosition.Right - monitorPosition.Left
                                         ,KEEP_TASKBAR_VISIBLE ? monitorPosition.BottomWA - monitorPosition.TopWA - winY - winH + (taskBarLocation="Top"?taskBarSize.H:0) : monitorPosition.Bottom - monitorPosition.Top - winY - winH]
+
+            if (USE_OUTPUT_LOGGING=True)
+                FileAppend,% "`n`nBlack bars location determined:"
+                . "`nMain: x" blackBarsGuis.Main.1 " y" blackBarsGuis.Main.2 " w" blackBarsGuis.Main.3 " h" blackBarsGuis.Main.4
+                . "`nTop: x" blackBarsGuis.Top.1 " y" blackBarsGuis.Top.2 " w" blackBarsGuis.Top.3 " h" blackBarsGuis.Top.4
+                . "`nBottom: x" blackBarsGuis.Bottom.1 " y" blackBarsGuis.Bottom.2 " w" blackBarsGuis.Bottom.3 " h" blackBarsGuis.Bottom.4
+                ,% LOGS_FILE
 
             for index, guiName in ["Main","Top","Bottom"] {
                 Gui, BlackBar%guiName%:New,% "+ToolWindow +LastFound -Resize -SysMenu +0x04000000 -Caption -Border -0x40000 +E0x08000000 " (guiName!="Main"?"+ParentBlackBarMain":"") " +HwndhGuiBlackBar" guiName
@@ -231,11 +287,13 @@ MakeBorderless(winHwnd) {
 }
 
 DeleteInactiveGameHandles() {
-    global DoneOnceGameHandles
-    global POEGameGroup
+    global DoneOnceGameHandles, POEGameGroup
+    global USE_OUTPUT_LOGGING, LOGS_FILE
     for handle, value in DoneOnceGameHandles {
         if !WinExist("ahk_group POEGameGroup ahk_id " handle) {
             DoneOnceGameHandles.Remove(handle)
+            if (USE_OUTPUT_LOGGING=True)
+                FileAppend,% "`n`nGame window " handle " removed from object list has it doesn't exist anymore",% LOGS_FILE
         }
     }
 }
