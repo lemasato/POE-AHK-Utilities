@@ -192,12 +192,9 @@ MakeBorderless(winHwnd) {
         taskBarLocation := GetTaskBarLocation()
         monitorPosition := GetMonitorPosition(monitorIndex)
 
-        ; WinSet, Style,% "-" WS_POPUP+WS_THICKFRAME+WS_CAPTION, % "ahk_id " winHwnd
         DEFAULT_WINDOWED_FULLSCREEN_POE_STYLE := WS_POPUP+WS_VISIBLE+WS_CLIPSIBLINGS
         FINAL_STYLE := DEFAULT_WINDOWED_FULLSCREEN_POE_STYLE
-        FINAL_STYLE := activeStyles & +WS_THICKFRAME ? FINAL_STYLE+WS_THICKFRAME : FINAL_STYLE
-        FINAL_STYLE := activeStyles & +WS_CAPTION ? FINAL_STYLE+WS_CAPTION : FINAL_STYLE
-        WinSet, Style,% DEFAULT_WINDOWED_FULLSCREEN_POE_STYLE, % "ahk_id " winHwnd
+        WinSet, Style,% FINAL_STYLE, % "ahk_id " winHwnd
         
         WinMove,% "ahk_id " winHwnd,% winText:=""
         ,% newWinX := CUSTOM_GAME_POSITION_ENABLE=True ? CUSTOM_GAME_X_POSITION : KEEP_TASKBAR_VISIBLE ? monitorPosition.LeftWA : monitorPosition.Left
@@ -225,7 +222,7 @@ MakeBorderless(winHwnd) {
         if (SIMULATE_WIDE_SCREEN=True && CUSTOM_GAME_POSITION_ENABLE=False) {
             availableMonitorHeightSpace := KEEP_TASKBAR_VISIBLE ? monitorPosition.BottomWA - monitorPosition.TopWA + (taskBarLocation="Top"?taskBarSize.H:0) : monitorPosition.Bottom - monitorPosition.Top
             WinGetPos, winX, winY, winW, winH, % "ahk_id " winHwnd
-            WinMove,% "ahk_id " winHwnd,,,% (availableMonitorHeightSpace/2) - (winH/2) ; + (KEEP_TASKBAR_VISIBLE && IsIn(taskBarLocation,"Top") ? taskBarSize.H : 0)
+            WinMove,% "ahk_id " winHwnd,,,% (availableMonitorHeightSpace/2) - (winH/2)
             if (USE_OUTPUT_LOGGING=True)
                 FileAppend,% "`n`nSIMULATE_WIDE_SCREEN is enabled"
                 . "`nAvailable monitor height space: " availableMonitorHeightSpace
