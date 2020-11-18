@@ -1,4 +1,4 @@
-/*
+﻿/*
 	v1.0
     POE Borderless Enhanced by lemasato
     Standalone script part of POE AHK Utilities
@@ -230,7 +230,7 @@ MakeBorderless(winHwnd) {
                 ,% LOGS_FILE
         }
         if (SIMULATE_WIDE_SCREEN=True && USE_BLACK_BARS_WITH_WIDE_SCREEN=True) {
-            Loop {
+            Loop 100 {
                 index := A_Index
                 if (index=1 && USE_OUTPUT_LOGGING=True)
                     FileAppend,% "`n`nWaiting for game window height to automatically be updated by the game",% LOGS_FILE
