@@ -102,8 +102,8 @@ CUSTOM_GAME_POSITION_ENABLE := False ; True     Allows to use specific x,y,width
 CUSTOM_GAME_X_POSITION := 0, CUSTOM_GAME_Y_POSITION := 0, CUSTOM_GAME_WIDTH := 1000, CUSTOM_GAME_HEIGHT := 700 ; Only use if CUSTOM_GAME_POSITION_ENABLE is set to True
 
 
-USE_OUTPUT_LOGGING := True ; True       Will write logs in a file, used for debugging
-                           ; False      No output log file will be created
+USE_OUTPUT_LOGGING := False ; True       Will write logs in a file, used for debugging
+                            ; False      No output log file will be created
 
 
 
