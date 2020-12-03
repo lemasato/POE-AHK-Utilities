@@ -1,5 +1,5 @@
 ﻿/*
-	v1.0.2
+	v1.0.3
     POE Borderless Enhanced by lemasato
     Standalone script part of POE AHK Utilities
     If you have any question or find an issue, don't hesitate to post on GitHub!
@@ -109,9 +109,12 @@ USE_OUTPUT_LOGGING := False ; True       Will write logs in a file, used for deb
 
 /*  SCRIPT CONTENT STARTING HERE
     DONT EDIT UNLESS YOU KNOW WHAT YOU'RE DOING
-
+    
+    v1.0.3 (03 Dec 2020)
+        Instead of applying a pre-set style, only remove "windowed" styles if existing
+        This fixes an issue where the script didn't work for some user
     v1.0.2 (17 Nov 2020)
-        Fixed typo that prevented the borderless style to work for some people
+        Fixed typo that prevented the borderless style to work for some user
     v1.0.1 (17 Nov 2020)
         Added logging option
     v1.0 (17 Nov 2020)
@@ -196,8 +199,9 @@ MakeBorderless(winHwnd) {
         taskBarLocation := GetTaskBarLocation()
         monitorPosition := GetMonitorPosition(monitorIndex)
 
-        DEFAULT_WINDOWED_FULLSCREEN_POE_STYLE := WS_POPUP+WS_VISIBLE+WS_CLIPSIBLINGS
-        FINAL_STYLE := DEFAULT_WINDOWED_FULLSCREEN_POE_STYLE
+        FINAL_STYLE := activeStyles
+        FINAL_STYLE := activeStyles&+WS_THICKFRAME?activeStyles-WS_THICKFRAME:FINAL_STYLE
+        FINAL_STYLE := activeStyles&+WS_CAPTION?activeStyles-WS_CAPTION:FINAL_STYLE
         WinSet, Style,% FINAL_STYLE, % "ahk_id " winHwnd
         
         WinMove,% "ahk_id " winHwnd,% winText:=""
