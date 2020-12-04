@@ -1,5 +1,5 @@
-﻿/*
-	v1.0.3
+/*
+	v1.0.4
     POE Borderless Enhanced by lemasato
     Standalone script part of POE AHK Utilities
     If you have any question or find an issue, don't hesitate to post on GitHub!
@@ -198,6 +198,7 @@ MakeBorderless(winHwnd) {
         taskBarSize := GetTaskBarSize()
         taskBarLocation := GetTaskBarLocation()
         monitorPosition := GetMonitorPosition(monitorIndex)
+        windowsDPI := Get_WindowsResolutionDPI()
 
         FINAL_STYLE := activeStyles
         FINAL_STYLE := activeStyles&+WS_THICKFRAME?activeStyles-WS_THICKFRAME:FINAL_STYLE
@@ -255,16 +256,16 @@ MakeBorderless(winHwnd) {
             blackBarsGuis := {}
             blackBarsGuis["Main"] := [monitorPosition.Left
                                         ,monitorPosition.Top
-                                        ,monitorPosition.Right - monitorPosition.Left
-                                        ,monitorPosition.Bottom - monitorPosition.Top]
+                                        ,(monitorPosition.Right - monitorPosition.Left)
+                                        ,(monitorPosition.Bottom - monitorPosition.Top)]
                                 blackBarsGuis["Top"] := [KEEP_TASKBAR_VISIBLE ? monitorPosition.LeftWA : monitorPosition.Left
                                         ,KEEP_TASKBAR_VISIBLE ? monitorPosition.TopWA : monitorPosition.Top
-                                        ,KEEP_TASKBAR_VISIBLE ? monitorPosition.RightWA - monitorPosition.LeftWA : monitorPosition.Right - monitorPosition.Left
-                                        ,KEEP_TASKBAR_VISIBLE ? winY - monitorPosition.TopWA : winY - monitorPosition.Top]
+                                        ,KEEP_TASKBAR_VISIBLE ? (monitorPosition.RightWA-monitorPosition.LeftWA)/windowsDPI : (monitorPosition.Right-monitorPosition.Left)/windowsDPI
+                                        ,KEEP_TASKBAR_VISIBLE ? (winY-monitorPosition.TopWA)/windowsDPI : (winY-monitorPosition.Top)/windowsDPI]
                                 blackBarsGuis["Bottom"] := [KEEP_TASKBAR_VISIBLE ? monitorPosition.LeftWA : monitorPosition.Left
                                         ,winY+winH
-                                        ,KEEP_TASKBAR_VISIBLE ? monitorPosition.RightWA - monitorPosition.LeftWA : monitorPosition.Right - monitorPosition.Left
-                                        ,KEEP_TASKBAR_VISIBLE ? monitorPosition.BottomWA - monitorPosition.TopWA - winY - winH + (taskBarLocation="Top"?taskBarSize.H:0) : monitorPosition.Bottom - monitorPosition.Top - winY - winH]
+                                        ,KEEP_TASKBAR_VISIBLE ? (monitorPosition.RightWA-monitorPosition.LeftWA)/windowsDPI : (monitorPosition.Right-monitorPosition.Left)/windowsDPI
+                                        ,KEEP_TASKBAR_VISIBLE ? (monitorPosition.BottomWA - monitorPosition.TopWA - winY - winH + (taskBarLocation="Top"?taskBarSize.H:0))/windowsDPI : (monitorPosition.Bottom - monitorPosition.Top - winY - winH)/windowsDPI]
 
             if (USE_OUTPUT_LOGGING=True)
                 FileAppend,% "`n`nBlack bars location determined:"
@@ -435,6 +436,10 @@ IsNum(str) {
 	if str is number
 		return true
 	return false
+}
+
+Get_WindowsResolutionDPI() {
+	return A_ScreenDPI=96?1:A_ScreenDPI/96
 }
 
 Exit(ExitReason, ExitCode) {
