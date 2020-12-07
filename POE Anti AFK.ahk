@@ -1,5 +1,5 @@
 ﻿/*
-	v1.0
+	v1.0.1
     POE Anti AFK by lemasato
     Standalone script part of POE AHK Utilities
     If you have any question or find an issue, don't hesitate to post on GitHub!
@@ -19,7 +19,7 @@
     Tested on AutoHotKey v1.1.33.02 (July 17 2020) Unicode x64
 */
 
-KEY_TO_PRESS := "a" ; The key to press to prevent appearing as AFK
+KEY_TO_PRESS := "1" ; The key to press to prevent appearing as AFK
                     ; I recommend to set this as one of your flask
 
 PAUSE_SCRIPT_WHILE_GAME_ACTIVE := True ; True       The script will not press the anti-afk key while the game window is active
@@ -29,7 +29,9 @@ PAUSE_SCRIPT_WHILE_GAME_ACTIVE := True ; True       The script will not press th
 
 /*  SCRIPT CONTENT STARTING HERE
     DONT EDIT UNLESS YOU KNOW WHAT YOU'RE DOING
-
+	
+	v1.0.1 (07 Dec 2020)
+		Changed default "a" binding to "1" to fit default in-game bindings.
     v1.0 (03 Dec 2020)
         Initial release
 */
